@@ -1,20 +1,6 @@
-import { Checkbox, createTheme, rem } from "@mantine/core";
+import { createTheme, rem } from "@mantine/core";
 
 export const theme = createTheme({
-  // colors: {
-  //   mantineColor: [
-  //     "#e9efff",
-  //     "#d0dbff",
-  //     "#a0b3fd",
-  //     "#6c88f8",
-  //     "#4064f4",
-  //     "#244ef3",
-  //     "#1242f3",
-  //     "#0135d9",
-  //     "#002ec3",
-  //     "#0026ac",
-  //   ],
-  // },
   fontFamily: "IRANSansWebFa",
 
   components: {
@@ -33,6 +19,16 @@ export const theme = createTheme({
         offset: 15,
       },
     },
+    // Modal: {
+    //   defaultProps: {
+    //     styles: {
+    //       content: {
+    //         position: "absolute",
+    //         left: "calc(75rem)",
+    //       },
+    //     },
+    //   },
+    // },
     Button: {
       defaultProps: {
         variant: "light",
@@ -42,6 +38,17 @@ export const theme = createTheme({
           fontWeight: 400,
           paddingInline: "4px",
           color: "#101828",
+        },
+      },
+    },
+    Badge: {
+      defaultProps: {
+        size: "lg",
+        radius: "lg",
+        color: "#F7F7F8",
+        style: {
+          fontSize: 12,
+          fontWeight: 600,
         },
       },
     },
@@ -64,6 +71,19 @@ export const theme = createTheme({
         styles: {
           option: { fontSize: "12px" },
           input: { paddingInlineEnd: "32px", paddingInlineStart: "2px" },
+        },
+      },
+    },
+    Paper: {
+      defaultProps: {
+        w: rem(160),
+        p: "sm",
+        pos: "absolute",
+        bottom: rem(12),
+        left: rem(12),
+        style: {
+          boxShadow: "0px 1px 4px 0px rgba(12, 12, 13, 0.1)",
+          backgroundColor: "rgba(247, 247, 248, 0.6)",
         },
       },
     },

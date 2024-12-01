@@ -2,7 +2,7 @@ import { Stack, TextInput, rem } from "@mantine/core";
 import { useClickOutside } from "@mantine/hooks";
 import { useMemo, useState } from "react";
 import { Calendar, CalendarProvider } from "zaman";
-import className from "./calender.module.css";
+import style from "../../style/style.module.css";
 
 interface CalenderParams {
   date: Date;
@@ -33,7 +33,7 @@ export default function CustomCalendar({ date, setDate }: CalenderParams) {
             }}
             defaultValue={date}
             weekends={[6]}
-            className={className["date-picker"]}
+            className={style["date-picker"]}
           />
         )}
       </Stack>

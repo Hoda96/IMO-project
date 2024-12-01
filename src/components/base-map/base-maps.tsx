@@ -2,16 +2,13 @@ import { Checkbox, Group, Image, Stack, Text } from "@mantine/core";
 import { mapStylesSourcesType } from "../../shared/type";
 import { mapStylesSources } from "./base-map-styles";
 import { useAtom } from "jotai";
-import { mapStyleAtom } from "../../atom/atom";
+import { mapLabelIdsAtom, mapStyleAtom } from "../../atom/atom";
+import { useState } from "react";
 
 export default function BaseMaps() {
   const [, setMapStyle] = useAtom(mapStyleAtom);
-  const updateMapStyleAtom = () => {
-    return (newSource: string) => {
-      const newUrl = `https://map.ir/vector/styles/main/${newSource}.json`;
-      setMapStyle(newUrl);
-    };
-  };
+  const [, setLabelIds] = useAtom(mapLabelIdsAtom);
+  const [checked, setChecked] = useState<string>("");
 
   const vectorPreview = mapStylesSources
     .filter((mapStyle: mapStylesSourcesType) => mapStyle.type === "vector")
@@ -19,8 +16,14 @@ export default function BaseMaps() {
       <Group key={style.source} justify="space-between">
         <Checkbox
           label={style.labelID}
+          value={style.labelID}
+          checked={checked === style.labelID}
           size="xs"
-          onClick={() => updateMapStyleAtom()(style.source)}
+          onChange={() => {
+            setChecked(style.labelID);
+            setMapStyle({ type: style.type, source: style.source });
+            setLabelIds(style.labelID);
+          }}
         />
         <Image
           radius="md"
@@ -35,7 +38,17 @@ export default function BaseMaps() {
     .filter((mapStyle: mapStylesSourcesType) => mapStyle.type === "raster")
     .map((style: mapStylesSourcesType) => (
       <Group key={style.source} justify="space-between">
-        <Checkbox label={style.labelID} size="xs" />
+        <Checkbox
+          label={style.labelID}
+          value={style.labelID}
+          checked={checked === style.labelID}
+          size="xs"
+          onChange={() => {
+            setChecked(style.labelID);
+            setMapStyle({ type: style.type, source: style.source });
+            setLabelIds(style.labelID);
+          }}
+        />
         <Image
           radius="md"
           w={"35px"}

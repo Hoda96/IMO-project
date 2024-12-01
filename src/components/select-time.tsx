@@ -1,7 +1,26 @@
-import { Select, rem } from "@mantine/core";
+import { Select } from "@mantine/core";
 import { hours } from "../shared/constant";
-export default function SelectTime() {
+import { useAtom } from "jotai";
+import { selectTimeValueAtom } from "../atom/atom";
+
+const TimeSelector = () => {
+  const [selectTimeValue, setSelectTimeValue] = useAtom(selectTimeValueAtom);
+
+  // Handle Select change
+  const handleChange = (value: string | null) => {
+    if (value) {
+      setSelectTimeValue(value);
+    }
+  };
+
   return (
-    <Select placeholder={hours[0]} data={hours} style={{ width: rem(100) }} />
+    <Select
+      data={hours}
+      style={{ width: "100px" }}
+      value={selectTimeValue}
+      onChange={handleChange}
+    />
   );
-}
+};
+
+export default TimeSelector;

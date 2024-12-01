@@ -1,4 +1,3 @@
-
 export type VectorSourceIDs =
   | "mapir-xyz-style"
   | "mapir-style-dark"
@@ -22,4 +21,23 @@ export type mapStylesSourcesType = {
   source: SourceIDs;
   type: MapStyleTypes;
   labelID: string;
+};
+
+export type IMapStyle = { type?: string; source: string };
+
+export type rasterLayerParamsProps = {
+  kpi: string;
+  date: string;
+  time: string;
+};
+export type contourLayerParamsProps = {
+  kpiArr: string | string[];
+  date: string;
+  time: string;
+};
+
+export type KPIData = {
+  date: string;
+  time: string;
+  value: number | null;
 };

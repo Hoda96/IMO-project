@@ -35,7 +35,19 @@ body {
   margin: 0;
 }
 
-/* svg.tabler-icon {
-    width: 16px;
-    height: 16px;
-  } */
+[data-mantine-color-scheme="light"] .m_9bd7b098:last-child {
+  --item-border-color: none;
+}
+.maplibregl-ctrl-attrib.maplibregl-compact-show {
+  display: none;
+}
+.css-137m4ck {
+  font-size: medium;
+}
+.css-7qlbje {
+  left: 8px !important;
+}
+.m_1b7284a3.m_54c44539.m_fd1ab0aa.mantine-Modal-content.mantine-Paper-root {
+  bottom: 50px !important;
+  width:80% !important;
+}

@@ -1,0 +1,37 @@
+.date-picker {
+  position: absolute !important;
+  z-index: 9999;
+  top: 3rem;
+  right: -7rem;
+}
+.lat-lng {
+  display: flex;
+  position: absolute;
+  justify-content: center;
+  align-items: center;
+  width: 240px;
+  height: 25px;
+  background-color: rgba(16, 24, 40, 0.6);
+  border-radius: 4px;
+  bottom: 10px;
+  left: 12px;
+  color: "#FFFFFF";
+}
+.attribute {
+  display: flex;
+  position: absolute;
+  justify-content: center;
+  align-items: center;
+  bottom: 10px;
+  right: 12px;
+  padding: 5px;
+  color: "#FFFFFF";
+  box-shadow: 0px 1px 4px 0px rgba(12, 12, 13, 0.1);
+  background-color: rgba(16, 24, 40, 0.6);
+  border-radius: 4px;
+}
+.element {
+  &:hover {
+    background-color: red;
+  }
+}
