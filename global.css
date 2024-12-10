@@ -49,5 +49,12 @@ body {
 }
 .m_1b7284a3.m_54c44539.m_fd1ab0aa.mantine-Modal-content.mantine-Paper-root {
   bottom: 50px !important;
-  width:80% !important;
+  width: 80% !important;
+}
+.maplibregl-popup-close-button {
+  display: flex;
+  left: 5px;
+  top: 6px;
+  font-size: 16px;
+  width: 20px;
 }

@@ -11,14 +11,7 @@ import Map, {
 import { X_API_KEY } from "./config/config";
 
 import { useAtom } from "jotai";
-import {
-  SetStateAction,
-  useCallback,
-  useEffect,
-  useMemo,
-  useRef,
-  useState,
-} from "react";
+import { SetStateAction, useEffect, useMemo, useRef, useState } from "react";
 import {
   checkedGroupAtom,
   contourLayersColorAtom,
@@ -30,10 +23,10 @@ import {
   mouseClickAtom,
   mouseMoveAtom,
   rasterCheckedAtom,
+  rasterTileOpacityMapAtom,
   rasterUrlAtom,
 } from "./atom/atom";
 import { convertToDms, generateMapStyle } from "./components/base-map/utils";
-import LayersAccordion from "./components/layers-accordion";
 import Navbar from "./components/navbar";
 
 import Attribute from "./components/attribute";
@@ -41,29 +34,39 @@ import Attribute from "./components/attribute";
 import style from "../src/style/style.module.css";
 import KpiChartModal from "./components/kpi-chart-modal";
 import KpiPopup from "./components/kpi-popup";
+import LayersAccordion from "./components/layers-accordion";
 import { contourStyle } from "./shared/utils";
 
 function App() {
   const [mapStyle] = useAtom(mapStyleAtom);
+
   const [checkedRasters] = useAtom(rasterCheckedAtom);
   const [checkedContours] = useAtom(checkedGroupAtom);
-  const [rasterLayer] = useAtom(rasterUrlAtom);
-  const [contourLayers] = useAtom(contourUrlsAtom);
-  const [contourLayersColors] = useAtom(contourLayersColorAtom);
-  const [maximize] = useAtom(maximizeAtom);
-  const [mouseClick, setMouseClick] = useAtom(mouseClickAtom);
-  const [showKpiPopup, setShowKpiPopup] = useAtom(kpiPopupAtom);
-  const [showKpiChartModal] = useAtom(kpiChartModalAtom);
+  const [rasterTileSource] = useAtom(rasterUrlAtom);
+  const [contourTilesSource] = useAtom(contourUrlsAtom);
+  const [contourLayersColor] = useAtom(contourLayersColorAtom);
 
+  const [maximize] = useAtom(maximizeAtom);
+
+  const [rasterTileOpacityMap] = useAtom(rasterTileOpacityMapAtom);
+
+  const [firstContourId, setFirstContourId] = useState<string>();
+
+  const [showPopup, setShowPopup] = useAtom(kpiPopupAtom);
+  const [showKpiChartModal] = useAtom(kpiChartModalAtom);
+  const [mouseClick, setMouseClick] = useAtom(mouseClickAtom);
   const [mouseMove, setMouseMove] = useAtom(mouseMoveAtom);
   const lat = mouseMove?.lngLat?.lat;
   const lng = mouseMove?.lngLat?.lng;
-
-  const { latDms, lngDms } = convertToDms(lat, lng);
-
   const [popupCoordinates, setPopupCoordinates] = useState({ lat, lng });
   const popupLat = popupCoordinates.lat;
   const popupLng = popupCoordinates.lng;
+
+  const showKpiPopup = showPopup && popupLat && popupLng;
+
+  const { latDms, lngDms } = useMemo(() => {
+    return convertToDms(lat, lng);
+  }, [lat, lng]);
 
   const mapRef = useRef<MapRef>(null);
 
@@ -71,53 +74,39 @@ function App() {
     return generateMapStyle(mapStyle);
   }, [mapStyle]);
 
-  const handleMouseMove = (
-    e: SetStateAction<MapLayerMouseEvent | undefined>
-  ) => {
-    setMouseMove(e);
-  };
-
   useEffect(() => {
     if (mouseClick) {
       const lat = mouseClick.lngLat.lat;
       const lng = mouseClick.lngLat.lng;
       if (lat && lng) {
         setPopupCoordinates({ lat, lng });
-        setShowKpiPopup(true);
+        setShowPopup(true);
       }
     }
-  }, [mouseClick]);
+  }, [mouseClick, setShowPopup]);
 
-  const handleMouseClick = (
-    e: SetStateAction<MapLayerMouseEvent | undefined>
-  ) => {
-    setMouseClick(e);
-  };
-
-  const [firstContourId, setFirstSymbolId] = useState<string>();
-
-  const handleStyleLoad = useCallback(() => {
-    let contourLayerss = [];
-    let lastContourId: string | undefined;
+  useEffect(() => {
     const map = mapRef.current?.getMap();
-    if (map && map.isStyleLoaded()) {
-      const layers = map.getStyle().layers;
+    if (!map || !map.isStyleLoaded()) return;
 
-      contourLayerss = layers.filter((l) => l.id.startsWith("contour-layers-"));
+    const layers = map.getStyle().layers;
 
-      if (contourLayerss.length > 0) {
-        lastContourId = contourLayerss[contourLayerss.length - 1].id;
-      }
-      setFirstSymbolId(lastContourId);
+    const contourLayerss = layers.filter((l) =>
+      l.id.startsWith("contour-layer-")
+    );
+
+    if (contourLayerss.length > 0) {
+      const lastContourId = contourLayerss[0]?.id;
+
+      setFirstContourId(lastContourId);
     }
-  }, [mapRef]);
+  }, [mapRef, contourTilesSource]);
 
   return (
     <>
       <Stack w={"100%"} h={"100vh"}>
         <Map
           ref={mapRef}
-          onLoad={handleStyleLoad}
           initialViewState={{
             latitude: 31.77,
             longitude: 54.82,
@@ -131,34 +120,42 @@ function App() {
               "x-api-key": X_API_KEY,
             },
           })}
-          onMouseMove={handleMouseMove}
-          onClick={handleMouseClick}
+          onMouseMove={(e: SetStateAction<MapLayerMouseEvent | undefined>) =>
+            setMouseMove(e)
+          }
+          onClick={(e: SetStateAction<MapLayerMouseEvent | undefined>) =>
+            setMouseClick(e)
+          }
         >
           <Navbar />
           {/* Layers */}
           <LayersAccordion />
-          {/* LatLng */}
+
           {checkedContours.length > 0 &&
-            contourLayers.length &&
-            contourLayers.map((contourSource, index) => {
+            contourTilesSource.length &&
+            contourTilesSource.map((contourTileSource, index) => {
               return (
                 <Source
                   type="vector"
-                  key={`vector-source-${index}`}
-                  id={`vector-source-${index}`}
-                  tiles={[contourSource]}
+                  key={`contour-source-${index}`}
+                  id={`contour-source-${index}`}
+                  tiles={[contourTileSource]}
                 >
-                  <Layer {...contourStyle(index, contourLayersColors[index])} />
+                  <Layer {...contourStyle(index, contourLayersColor[index])} />
                 </Source>
               );
             })}
-          {checkedRasters.length !== 0 && (
-            <Source id="raster-source" type="raster" tiles={[rasterLayer]}>
+          {checkedRasters && (
+            <Source id="raster-source" type="raster" tiles={[rasterTileSource]}>
               <Layer
                 id="raster-layer"
                 type="raster"
                 source="raster-source"
                 beforeId={firstContourId}
+                paint={{
+                  "raster-opacity":
+                    (rasterTileOpacityMap.get(rasterTileSource) ?? 100) / 100,
+                }}
               />
             </Source>
           )}
@@ -174,17 +171,18 @@ function App() {
             </Group>
           )}
 
-          {showKpiPopup && popupLat && popupLng ? (
+          {showKpiPopup ? (
             <Popup
               latitude={popupLat}
               longitude={popupLng}
               maxWidth={rem(1000)}
-              onClose={() => setShowKpiPopup(false)}
-              closeButton={false}
+              onClose={() => setShowPopup(false)}
+              anchor="center"
             >
               <KpiPopup lat={popupLat} lng={popupLng} />
             </Popup>
           ) : null}
+
           {maximize && <Attribute />}
           {showKpiChartModal && <KpiChartModal />}
         </Map>
